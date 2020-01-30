@@ -30,10 +30,20 @@ def read_hdf(file_in,var_in):
 
     #--information from input file--
     f=SD(file_in,SDC.READ)
-    #dataset=f.datasets()
 
     var=f.select(var_in)
     var_data=var.get()
     var_dimn=var.dimensions()
 
     return var_data,var_dimn
+
+def require_var_info(file_in):
+    '''Print and Return variable names and dimentions in a HDF-EOS file'''
+    #--information from input file--
+    f=SD(file_in,SDC.READ)
+    var_info=f.datasets()
+    print("--Variables in ",file_in,"-->")
+    for name,value in var_info.items():
+        print("    ",name,": ",value)
+    return var_info
+
