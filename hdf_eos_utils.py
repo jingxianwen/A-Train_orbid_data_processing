@@ -1,4 +1,9 @@
-
+#========================================================================
+# This code contains functions for reading/requiring infor from A-Train HDF files.
+# Functions contained: 
+#   1. read_hdf(file_in,var_in)
+#   2. require_var_info_hdf(file_in)
+#========================================================================
 import numpy as np
 from pyhdf.SD import SD, SDC, SDAttr
 
@@ -37,7 +42,7 @@ def read_hdf(file_in,var_in):
 
     return var_data,var_dimn
 
-def require_var_info(file_in):
+def require_var_info_hdf(file_in):
     '''Print and Return variable names and dimentions in a HDF-EOS file'''
     #--information from input file--
     f=SD(file_in,SDC.READ)
@@ -47,3 +52,4 @@ def require_var_info(file_in):
         print("    ",name,": ",value)
     return var_info
 
+# end of file.
