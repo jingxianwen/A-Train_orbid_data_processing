@@ -38,8 +38,8 @@ def read_hdf(file_in,var_in):
 
     var=f.select(var_in)
     var_data=var.get()
-    var_dimn=var.dimensions()
-
+    #var_dimn=var.dimensions()
+    var_dimn = np.fromiter(var.dimensions().values(), dtype=int)
     return var_data,var_dimn
 
 def require_var_info_hdf(file_in):

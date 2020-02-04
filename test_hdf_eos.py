@@ -10,8 +10,8 @@ variables=["Temperature","Pressure","Specific_Humidity"]
 
 data_out,data_dimn=read_hdf(file_in,variables[0])
 
-#print(data_out.shape)
-#print(data_dimn.values())
+print(data_out.shape)
+print(data_dimn)
 #a=[x for x in data_dimn.values()]
 #print(a[1])
 #print("-- This is the end of the code. --")

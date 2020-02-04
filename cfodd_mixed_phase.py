@@ -28,6 +28,17 @@ path_CCL=data_home+'2B-CLDCLASS-LIDAR_P1_R05/2007/001/'
 path_MOD=data_home+'MODIS-AUX/2007/001/'
 
 #------------------------
+#-- creat Ze vs T bins-- 
+#------------------------
+num_zebin=25
+zebnd=np.linspace(-30,20,num_zebin+1)
+num_tbin=20
+tbnd=np.linspace(-30,20,num_tbin+1)
+
+cnt_sampl=np.zeros((num_tbin,num_zebin)) # counted number of samples
+pdf_sampl=np.zeros((num_tbin,num_zebin)) # PDF of cnt_sampl for each tbnd
+
+#------------------------
 #--loop granules-- 
 #------------------------
 print('--loop granules--')
@@ -52,34 +63,43 @@ for ig in rng_gran:
     if len(file_mod)==0 or len(file_ecmwf)>1: 
         print('NOT FOUND or TWO MANY: ',ig,' ',file_mod)
         break
-
     #------------------------
     #--extract data from input--
     #------------------------
-    #print('--extract data from input--')
-    
-    #var_info=require_var_info_hdf(file_ecmwf)
-    
-    #variables=['Temperature','Pressure','Specific_Humidity']
-    #data_out,data_dimn=read_hdf(file_in,variables[0])
-    #T_in,T_dimn=read_hdf(file_ecmwf,Temperature)
-    #P_in,P_dimn=read_hdf(file_ecmwf,Temperature)
+    print('--extract data from input--')
+  # from 2B-GEOPROF 
+    ze,dimsz=read_hdf(file_geo[0],"Radar_Reflectivity")
+    num_pix=dimsz[0]
+    num_lev=dimsz[1]
+    cld_msk,dimsz=read_hdf(file_geo[0],"CPR_Cloud_mask")
+    ze=np.ma.masked_where(ze==-999, ze) #mask NaN and clear layer.
+
+  # from 2B-CLDCLASS
+    #sfc_loc,dimsz=read_hdf(file_geo,"CPR_Cloud_mask")
+
+  # from ECMWF-AUX
+    tair,dimsz=read_hdf(file_ecmwf[0],"Temperature")
+    tair=np.ma.masked_where(tair==-999,tair-273.15) #mask NaN, else Kelvin to Celsius.
+
+    #cld_phase,dimsz=read_hdf(file_ccl,"CloudPhase")
     
     #exit('end check point')
     
     #------------------------
     #--conditional sampling--
     #------------------------
-    #print('--conditional sampling--')
-    
+    print('--conditional sampling--')
+    print(ze[0:3,:])
     # 1. Tctop <0.0 [Celcius] 
-    
+    #for ig in range(0,num_pix):
+        
     # 2. Liquid cloud top
     
     # 3. Single layer clouds
     
     # 4. Including ice layer.
     
+    exit('end check point')
     #------------------------
     #--normalize in-cloud height--
     #------------------------
