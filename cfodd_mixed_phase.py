@@ -14,7 +14,7 @@
 import os
 import glob
 import numpy as np
-from hdf_eos_utils import read_hdf,require_var_info_hdf
+from hdf_eos_utils import read_hdf_SD,require_SD_info_hdf,read_hdf_VD,require_VD_info_hdf
 
 #------------------------
 #--input file location--
@@ -67,29 +67,50 @@ for ig in rng_gran:
     #--extract data from input--
     #------------------------
     print('--extract data from input--')
+    #require_SD_info_hdf(file_geo[0])
+    #require_VD_info_hdf(file_geo[0])
+
   # from 2B-GEOPROF 
-    ze,dimsz=read_hdf(file_geo[0],"Radar_Reflectivity")
+    ze,dimsz=read_hdf_SD(file_geo[0],"Radar_Reflectivity")
     num_pix=dimsz[0]
     num_lev=dimsz[1]
-    cld_msk,dimsz=read_hdf(file_geo[0],"CPR_Cloud_mask")
-    ze=np.ma.masked_where(ze==-999, ze) #mask NaN and clear layer.
+    cld_msk,dimsz=read_hdf_SD(file_geo[0],"CPR_Cloud_mask")
+    sfc_loc,dimsz=read_hdf_VD(file_geo[0],"SurfaceHeightBin")
 
   # from 2B-CLDCLASS
     #sfc_loc,dimsz=read_hdf(file_geo,"CPR_Cloud_mask")
 
   # from ECMWF-AUX
-    tair,dimsz=read_hdf(file_ecmwf[0],"Temperature")
-    tair=np.ma.masked_where(tair==-999,tair-273.15) #mask NaN, else Kelvin to Celsius.
+    tair,dimsz=read_hdf_SD(file_ecmwf[0],"Temperature")
+    #tair=np.ma.masked_where(tair<=-999,tair-273.15) #mask NaN, else Kelvin to Celsius.
 
     #cld_phase,dimsz=read_hdf(file_ccl,"CloudPhase")
     
     #exit('end check point')
     
     #------------------------
+    #--preprocess the data--
+    # mask invalide pixels
+    #------------------------
+    #a. surface layer and clutter
+     #for ig in range(0,num_pix):
+    #convert valid range from 1-125 to 0-124
+    print(max(sfc_loc))
+    print(min(sfc_loc))
+    print(sfc_loc[0:3])
+    sfc_loc=np.where(1<=sfc_loc<=125,sfc_loc-1,sfc_loc)
+    print(sfc_loc[0:3])
+    exit()
+    #for ig in range(0,1):
+    #    print(srf_loc[0])
+    #    print(ze[ig,srf_loc-1])
+    #    print(tair[ig,srf_loc-1])
+    #------------------------
     #--conditional sampling--
     #------------------------
     print('--conditional sampling--')
-    print(ze[0:3,:])
+    #print(ze[0:3,:])
+    #print(cld_msk[0,:])
     # 1. Tctop <0.0 [Celcius] 
     #for ig in range(0,num_pix):
         
