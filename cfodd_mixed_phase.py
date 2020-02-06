@@ -74,49 +74,74 @@ for ig in rng_gran:
     ze,dimsz=read_hdf_SD(file_geo[0],"Radar_Reflectivity")
     num_pix=dimsz[0]
     num_lev=dimsz[1]
-    cld_msk,dimsz=read_hdf_SD(file_geo[0],"CPR_Cloud_mask")
-    sfc_loc,dimsz=read_hdf_VD(file_geo[0],"SurfaceHeightBin")
+    #cld_msk,dimsz=read_hdf_SD(file_geo[0],"CPR_Cloud_mask")
+    #sfc_loc,dimsz=read_hdf_VD(file_geo[0],"SurfaceHeightBin")
+    height,dimsz=read_hdf_SD(file_geo[0],"Height")
 
   # from 2B-CLDCLASS
     #sfc_loc,dimsz=read_hdf(file_geo,"CPR_Cloud_mask")
+    cphase,dimsz=read_hdf_SD(file_ccl[0],"CloudPhase")
+    ctophgt,dimsz=read_hdf_SD(file_ccl[0],"CloudLayerTop")
+    cbasehgt,dimsz=read_hdf_SD(file_ccl[0],"CloudLayerBase")
+    ncldlay,dimsz=read_hdf_VD(file_ccl[0],"Cloudlayer")
+    #print(ncldlay.shape)
 
   # from ECMWF-AUX
     tair,dimsz=read_hdf_SD(file_ecmwf[0],"Temperature")
     #tair=np.ma.masked_where(tair<=-999,tair-273.15) #mask NaN, else Kelvin to Celsius.
-
-    #cld_phase,dimsz=read_hdf(file_ccl,"CloudPhase")
-    
+  
     #exit('end check point')
     
     #------------------------
     #--preprocess the data--
     # mask invalide pixels
     #------------------------
-    #a. surface layer and clutter
-     #for ig in range(0,num_pix):
-    #convert valid range from 1-125 to 0-124
-    print(max(sfc_loc))
-    print(min(sfc_loc))
-    print(sfc_loc[0:3])
-    sfc_loc=np.where(1<=sfc_loc<=125,sfc_loc-1,sfc_loc)
-    print(sfc_loc[0:3])
-    exit()
-    #for ig in range(0,1):
-    #    print(srf_loc[0])
-    #    print(ze[ig,srf_loc-1])
-    #    print(tair[ig,srf_loc-1])
+    #..convert valid range from 1-125 to 0-124, and set the cut point due to clutter.
+    #sfc_cut=np.where((sfc_loc>=1) & (sfc_loc<=125),sfc_loc-1-4,sfc_loc)
+    #..convert temperature from Kelvin to Celsius.
+    tair=np.where(tair<=-999,tair-273.15,tair) #Kelvin to Celsius.
+    height[:,:]=height[:,:]*0.001 # m to km
+
+    layind=range(0,num_lev)
+
+    for iprof in range(0,200):
+        #if sfc_cut[iprof] not in range(0,125): 
+        #    break # if wrong surface, jump to next iteration  
+        #masklay=np.where(layind>=sfc_clut_cut[ig],1,0)
+        #ze_tmp=np.ma.masked_array(ze[ig,:],mask=masklay)
+        #tair_tmp=np.ma.masked_array(tair[ig,:],mask=masklay)
     #------------------------
     #--conditional sampling--
     #------------------------
-    print('--conditional sampling--')
-    #print(ze[0:3,:])
-    #print(cld_msk[0,:])
-    # 1. Tctop <0.0 [Celcius] 
-    #for ig in range(0,num_pix):
-        
-    # 2. Liquid cloud top
-    
-    # 3. Single layer clouds
+        #print('--conditional sampling--')
+
+    # 1. Identify cloud top and bottom layer
+      #..use reflectivity and cloud_mask
+        #ctop_lev=min( np.min(np.where( (ze[ig,0:sfc_cut[ig]]>-30.) & (ze[ig,0:sfc_cut[ig]]<20.)),\
+        #              np.min(np.where(cld_mask[ig,0:sfc_cut[ig]]>=20)))
+        #cbot_lev=max( np.min(np.where( (ze[ig,0:sfc_cut[ig]]>-30.) & (ze[ig,0:sfc_cut[ig]]<20.)),\
+        #              np.min(np.where(cld_mask[ig,0:sfc_cut[ig]]>=20)))
+      #..use cloud phase 
+
+    # 1. Is single layer cloud?
+       if ncldlay[iprof] ==1:
+           ctop_id=np.min(np.where(height[iprof,:]<ctophgt[iprof,0]))
+           cbase_id=np.max(np.where(height[iprof,:]>cbasehgt[iprof,0]))
+           is_sgl=True
+    # 2. Is Tctop <0.0 [Celcius]? 
+           if tair[iprof,ctop_id] <0.0:
+               is_coldtop=True
+    # 3. Is mixed or ice cloud? 
+               if (cphase[iprof,0]==1 or cphase[iprof,0]==2):
+                   ze_max=np.max(ze[iprof,ctop_id:cbase_id+1])
+                   ctop
+               else:
+           else:
+               is_coldtop=False
+       else: 
+           is_sgl=False
+           is_coldtop=False
+
     
     # 4. Including ice layer.
     

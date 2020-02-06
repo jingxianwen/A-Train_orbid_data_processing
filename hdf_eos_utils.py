@@ -38,6 +38,8 @@ def read_hdf_SD(file_in,var_in):
     f=SD(file_in,SDC.READ)
     var=f.select(var_in)
     var_data=var.get()
+    var_data=np.float32(var_data)
+    #print(var_data.dtype)
     var_dimn = np.fromiter(var.dimensions().values(), dtype=int)
     return var_data,var_dimn
 
@@ -51,7 +53,8 @@ def read_hdf_VD(file_in,var_in):
     f=HDF(file_in)
     vs=f.vstart()
     vd=vs.attach(var_in) #return var data from vs group
-    var_data=np.array(vd[:])
+    var_data=np.array(vd[:]).ravel() #convert data into flatted ndarray
+    #print(var_data.dtype)
     var_dimn=np.array(var_data.shape)
     return var_data,var_dimn
 
