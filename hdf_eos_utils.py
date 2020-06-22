@@ -5,11 +5,17 @@
 #   2. require_var_info_hdf(file_in)
 #========================================================================
 import numpy as np
+<<<<<<< HEAD
 from pyhdf.HDF import *
 from pyhdf.SD import *
 from pyhdf.VS import *
 from pyhdf.V import *
 
+=======
+from pyhdf.SD import SD, SDC, SDAttr
+from pyhdf.HDF import *
+from pyhdf.VS import *
+>>>>>>> fab9b140a362a19aa0606fcfe46e7ef34549776e
 #========================================================================
 # Introduction for reading data from a HDF-EOS file -->
    #data_file="2007001005141_03607_CS_2B-CLDCLASS-LIDAR_GRANULE_P1_R05_E02_F00.hdf"
@@ -30,22 +36,28 @@ from pyhdf.V import *
    #$H_dml2=H.dim(1).length() #![get the length of the 2nd dimension]
 #========================================================================
 
+<<<<<<< HEAD
 #=====================================================
 def read_sd_hdf(file_in,var_in):
     '''Read data stored as a SD variable in input HDF-EOS file. '''
+=======
+def read_hdf_SD(file_in,var_in):
+    '''Read Scientific Data sets (SD)in the input HDF-EOS file. '''
+>>>>>>> fab9b140a362a19aa0606fcfe46e7ef34549776e
     '''Currently coded for vertical profile of A-Train granule. '''
     '''Inputs are the file path and the required variable name. '''
-    '''Outputs are the data (numpy array) and dimentions (dict).'''
+    '''Outputs are the data (numpy array) and dimentions(numpy).'''
 
     #--information from input file--
     f=SD(file_in,SDC.READ)
-
     var=f.select(var_in)
     var_data=var.get()
-    #var_dimn=var.dimensions()
+    var_data=np.float32(var_data)
+    #print(var_data.dtype)
     var_dimn = np.fromiter(var.dimensions().values(), dtype=int)
     return var_data,var_dimn
 
+<<<<<<< HEAD
 #=====================================================
 def read_vd_hdf(file_in,var_in,dimsz):
     '''Read data stored as a VD variable in input HDF-EOS file.'''
@@ -62,6 +74,24 @@ def read_vd_hdf(file_in,var_in,dimsz):
 
 #=====================================================
 def require_sd_info_hdf(file_in):
+=======
+def read_hdf_VD(file_in,var_in):
+    '''Read Vdata sets (table, 1D) in the input HDF-EOS file.    '''
+    '''Currently coded for surface variables of A-Train granule. '''
+    '''Inputs are the file path and the required variable name.  '''
+    '''Outputs are the data (numpy array) and dimentions(numpy). '''
+
+    #--information from input file--
+    f=HDF(file_in)
+    vs=f.vstart()
+    vd=vs.attach(var_in) #return var data from vs group
+    var_data=np.array(vd[:]).ravel() #convert data into flatted ndarray
+    #print(var_data.dtype)
+    var_dimn=np.array(var_data.shape)
+    return var_data,var_dimn
+
+def require_SD_info_hdf(file_in):
+>>>>>>> fab9b140a362a19aa0606fcfe46e7ef34549776e
     '''Print and Return SD variable names and dimentions in a HDF-EOS file'''
     #--information from input file--
     f=SD(file_in,SDC.READ)
@@ -71,6 +101,7 @@ def require_sd_info_hdf(file_in):
         print("    ",name,": ",value)
     return var_info
 
+<<<<<<< HEAD
 #=====================================================
 #def require_vs_info_hdf(file_in):
 #    '''Print and Return VS variable names and dimentions in a HDF-EOS file'''
@@ -191,5 +222,17 @@ def HDFvars(File):
 #    except HDF4Error:    # no more vgroup
 #        break
 #    describevg(ref)
+=======
+def require_VD_info_hdf(file_in):
+    '''Print and Return VD variable names and dimentions in a HDF-EOS file'''
+    #--information from input file--
+    f=HDF(file_in)
+    vs=f.vstart()
+    var_info=vs.vdatainfo()
+    print("--Variables in ",file_in,"-->")
+    for item in var_info:
+        print(item)
+    return var_info
+>>>>>>> fab9b140a362a19aa0606fcfe46e7ef34549776e
 
 # end of file.
