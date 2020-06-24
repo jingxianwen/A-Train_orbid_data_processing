@@ -35,9 +35,12 @@ zebnd=np.linspace(-30.,20.,num_zebin+1)
 num_tcbin=20
 tcbnd=np.linspace(-40.,0.,num_tcbin+1)
 
-cnt_samp_N=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-cnt_samp_S=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-pdf_samp=np.zeros((num_tcbin,num_zebin),dtype=np.float32) # PDF of cnt_sampl for each tcbnd
+cnt_samp_N1=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_N2=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_N3=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_S1=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_S2=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_S3=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
 
 #------------------------
 #--loop granules-- 
@@ -165,8 +168,9 @@ for iyr in years:
         q_cld_phase_flag = q_cld_phase[:,0] >5
 
         # e. not precipitation near surface (ze < -10. dBz) (using FANCY indexing)
-        surf_precp_flag = ze[range(0,num_pix),surfbin-4] < -10.
-
+        surf_precp_flag1 = ze[range(0,num_pix),surfbin-4] < -15. #* ze[range(0,num_pix),surfbin-5] < -15.
+        surf_precp_flag2 = ze[range(0,num_pix),surfbin-5] < -15. #* ze[range(0,num_pix),surfbin-5] < -15.
+        surf_precp_flag = surf_precp_flag1 * surf_precp_flag2
         ##
         ## >> STEP 2: sample the data 
         ##
@@ -187,6 +191,7 @@ for iyr in years:
         n_sampl       = ze_samp.shape[0]
         #print(n_sampl)
 
+
         for ism in range(0,n_sampl):
            clevs = (height_samp[ism,:] > cld_base_samp[ism]) * \
                       (height_samp[ism,:] < cld_top_samp[ism])
@@ -197,12 +202,27 @@ for iyr in years:
            t_ctop = tair_samp[ism,clevs][0]
            
            # locate in the t_ctop-ze_max domain
-           ize = min(max(zebnd[zebnd<=ze_max].size-1,0),num_zebin-1)
-           itc = min(max(tcbnd[tcbnd<=t_ctop].size-1,0),num_tcbin-1)
-           if lat_samp[ism] >= 0.:
-              cnt_samp_N[itc,ize] = cnt_samp_N[itc,ize]+1
-           else:
-              cnt_samp_S[itc,ize] = cnt_samp_S[itc,ize]+1
+           #ize = min(max(zebnd[zebnd<=ze_max].size-1,0),num_zebin-1)
+           #itc = min(max(tcbnd[tcbnd<=t_ctop].size-1,0),num_tcbin-1)
+           ize = zebnd[zebnd<=ze_max].size-1
+           itc = tcbnd[tcbnd<=t_ctop].size-1
+           if ize > num_zebin-1 or ize <  0:
+              continue
+           if itc > num_tcbin-1 or itc <  0:
+              continue
+
+           if lat_samp[ism] >= 0. and lat_samp[ism] <30.:
+              cnt_samp_N1[itc,ize] = cnt_samp_N1[itc,ize]+1
+           elif lat_samp[ism] >= 30. and lat_samp[ism] <60.:
+              cnt_samp_N2[itc,ize] = cnt_samp_N2[itc,ize]+1
+           elif lat_samp[ism] >= 60. :
+              cnt_samp_N3[itc,ize] = cnt_samp_N3[itc,ize]+1
+           elif lat_samp[ism] >= -30. and lat_samp[ism] <0.:
+              cnt_samp_S1[itc,ize] = cnt_samp_S1[itc,ize]+1
+           elif lat_samp[ism] >= -60. and lat_samp[ism] <-30.:
+              cnt_samp_S2[itc,ize] = cnt_samp_S2[itc,ize]+1
+           elif lat_samp[ism] <-60.:
+              cnt_samp_S3[itc,ize] = cnt_samp_S3[itc,ize]+1
            #print(ze_max)
            #print(t_ctop)
            #print(itc,ize)
@@ -210,44 +230,35 @@ for iyr in years:
            #print(ze_samp[ism,clevs])
            #exit()
 
-        # 4. Do statistics (Ze-Ttop)
-
-        ### 1. Tctop <0.0 [Celcius] 
-        ### 2. Liquid cloud top
-        ### 3. Single layer clouds
-        ### 4. Including ice layer.
-        
-        #exit('end check point')
-        #------------------------
-        #--normalize in-cloud height--
-        #------------------------
-        #print('--normalize in-cloud height--')
-        
-        
-        #------------------------
-        #--set the Ze and Height bins-- 
-        #------------------------
-        #print('--set the Ze and Height bins--')
-        
-        #------------------------
-        #--count samples in Ze-Height space--
-        #------------------------
-        #print('--count samples in Ze-Height space--')
-        
-        # 1. all cases
-        
-        # 2. classify with LWP
-        
-        # 3. classify with Re
-
-fout=open('cnt_cld_NH.txt','w')
+#==============================================
+fout=open('cnt_cld_NH_0-30.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_N[il,:])+'\n')
+  fout.write(str(cnt_samp_N1[il,:])+'\n')
 fout.close()
 
-fout=open('cnt_cld_SH.txt','w')
+fout=open('cnt_cld_NH_30-60.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_S[il,:])+'\n')
+  fout.write(str(cnt_samp_N2[il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_NH_60-90.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_N3[il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_SH_0-30.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_S1[il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_SH_30-60.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_S2[il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_SH_60-90.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_S3[il,:])+'\n')
 fout.close()
 
 #------------------------
