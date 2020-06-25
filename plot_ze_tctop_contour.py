@@ -43,12 +43,12 @@ pdf_samp_S3=np.zeros((num_tcbin,num_zebin),dtype=np.float32) # PDF of cnt_sampl 
 #------------------------
 #-- open and read file --
 #------------------------
-fileN1=open('cnt_cld_ocn_NH_0-30.txt','r')
-fileN2=open('cnt_cld_ocn_NH_30-60.txt','r')
-fileN3=open('cnt_cld_ocn_NH_60-90.txt','r')
-fileS1=open('cnt_cld_ocn_SH_0-30.txt','r')
-fileS2=open('cnt_cld_ocn_SH_30-60.txt','r')
-fileS3=open('cnt_cld_ocn_SH_60-90.txt','r')
+fileN1=open('cnt_cld_lnd_NH_0-30.txt','r')
+fileN2=open('cnt_cld_lnd_NH_30-60.txt','r')
+fileN3=open('cnt_cld_lnd_NH_60-90.txt','r')
+fileS1=open('cnt_cld_lnd_SH_0-30.txt','r')
+fileS2=open('cnt_cld_lnd_SH_30-60.txt','r')
+fileS3=open('cnt_cld_lnd_SH_60-90.txt','r')
 
 data=fileN1.read()
 data_n=data.replace('[',' ')
@@ -120,12 +120,12 @@ for ir in range(num_tcbin):
 
 # make the plot
 fig=plt.figure(figsize=(10,6))
-ax1=fig.add_axes([0.1,0.5,0.25,0.3])
-ax2=fig.add_axes([0.4,0.5,0.25,0.3])
-ax3=fig.add_axes([0.7,0.5,0.25,0.3])
-ax4=fig.add_axes([0.1,0.1,0.25,0.3])
-ax5=fig.add_axes([0.4,0.1,0.25,0.3])
-ax6=fig.add_axes([0.7,0.1,0.25,0.3])
+ax1=fig.add_axes([0.08,0.5,0.25,0.3])
+ax2=fig.add_axes([0.38,0.5,0.25,0.3])
+ax3=fig.add_axes([0.68,0.5,0.31,0.3])
+ax4=fig.add_axes([0.08,0.1,0.25,0.3])
+ax5=fig.add_axes([0.38,0.1,0.25,0.3])
+ax6=fig.add_axes([0.68,0.1,0.31,0.3])
 
 yloc=tcbnd[0:-1]
 xloc=zebnd[0:-1]
