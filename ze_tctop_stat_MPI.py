@@ -35,12 +35,12 @@ zebnd=np.linspace(-30.,20.,num_zebin+1)
 num_tcbin=20
 tcbnd=np.linspace(-40.,0.,num_tcbin+1)
 
-cnt_samp_N1=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-cnt_samp_N2=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-cnt_samp_N3=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-cnt_samp_S1=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-cnt_samp_S2=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
-cnt_samp_S3=np.zeros((num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_N1=np.zeros((2,num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_N2=np.zeros((2,num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_N3=np.zeros((2,num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_S1=np.zeros((2,num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_S2=np.zeros((2,num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
+cnt_samp_S3=np.zeros((2,num_tcbin,num_zebin),dtype=np.int64) # counted number of samples
 
 #------------------------
 #--loop granules-- 
@@ -108,6 +108,7 @@ for iyr in years:
         height,dimsz = read_sd_hdf(file_geo[0],"Height")
         height       = height * 0.001   # meter to km
         landsea_flag = read_vd_hdf(file_geo[0],"Navigation_land_sea_flag",num_pix)
+        landsea_flag = landsea_flag.reshape((num_pix))
         surfbin      = read_vd_hdf(file_geo[0],"SurfaceHeightBin",num_pix)
         surfbin      = surfbin.reshape((num_pix))
         lat          = read_vd_hdf(file_geo[0],"Latitude",num_pix)
@@ -187,6 +188,7 @@ for iyr in years:
         cld_base_samp = cld_lay_base[:,0][samp_flag]
         cld_top_samp  = cld_lay_top[:,0][samp_flag]
         lat_samp      = lat[samp_flag]
+        landsea_flag_samp = landsea_flag[samp_flag]
    
         n_sampl       = ze_samp.shape[0]
         #print(n_sampl)
@@ -206,23 +208,32 @@ for iyr in years:
            #itc = min(max(tcbnd[tcbnd<=t_ctop].size-1,0),num_tcbin-1)
            ize = zebnd[zebnd<=ze_max].size-1
            itc = tcbnd[tcbnd<=t_ctop].size-1
-           if ize > num_zebin-1 or ize <  0:
+           if ize > num_zebin-1 or ize <  0: # if ze >20. or ze<-30.
               continue
-           if itc > num_tcbin-1 or itc <  0:
+           if itc > num_tcbin-1 or itc <  0: # if tc >0. or tc<-40.
               continue
 
+           # land/sea index (landsea_flag = 1, land; 2, ocean; 3, coast) 
+           if landsea_flag_samp[ism] == 1:
+              isfc=0
+           elif landsea_flag_samp[ism] == 2:
+              isfc=1             
+           else:
+              continue
+
+           # count number of clouds
            if lat_samp[ism] >= 0. and lat_samp[ism] <30.:
-              cnt_samp_N1[itc,ize] = cnt_samp_N1[itc,ize]+1
+              cnt_samp_N1[isfc,itc,ize] = cnt_samp_N1[isfc,itc,ize]+1
            elif lat_samp[ism] >= 30. and lat_samp[ism] <60.:
-              cnt_samp_N2[itc,ize] = cnt_samp_N2[itc,ize]+1
+              cnt_samp_N2[isfc,itc,ize] = cnt_samp_N2[isfc,itc,ize]+1
            elif lat_samp[ism] >= 60. :
-              cnt_samp_N3[itc,ize] = cnt_samp_N3[itc,ize]+1
+              cnt_samp_N3[isfc,itc,ize] = cnt_samp_N3[isfc,itc,ize]+1
            elif lat_samp[ism] >= -30. and lat_samp[ism] <0.:
-              cnt_samp_S1[itc,ize] = cnt_samp_S1[itc,ize]+1
+              cnt_samp_S1[isfc,itc,ize] = cnt_samp_S1[isfc,itc,ize]+1
            elif lat_samp[ism] >= -60. and lat_samp[ism] <-30.:
-              cnt_samp_S2[itc,ize] = cnt_samp_S2[itc,ize]+1
+              cnt_samp_S2[isfc,itc,ize] = cnt_samp_S2[isfc,itc,ize]+1
            elif lat_samp[ism] <-60.:
-              cnt_samp_S3[itc,ize] = cnt_samp_S3[itc,ize]+1
+              cnt_samp_S3[isfc,itc,ize] = cnt_samp_S3[isfc,itc,ize]+1
            #print(ze_max)
            #print(t_ctop)
            #print(itc,ize)
@@ -231,34 +242,65 @@ for iyr in years:
            #exit()
 
 #==============================================
-fout=open('cnt_cld_NH_0-30.txt','w')
+fout=open('cnt_cld_lnd_NH_0-30.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_N1[il,:])+'\n')
+  fout.write(str(cnt_samp_N1[0,il,:])+'\n')
 fout.close()
 
-fout=open('cnt_cld_NH_30-60.txt','w')
+fout=open('cnt_cld_lnd_NH_30-60.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_N2[il,:])+'\n')
+  fout.write(str(cnt_samp_N2[0,il,:])+'\n')
 fout.close()
 
-fout=open('cnt_cld_NH_60-90.txt','w')
+fout=open('cnt_cld_lnd_NH_60-90.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_N3[il,:])+'\n')
+  fout.write(str(cnt_samp_N3[0,il,:])+'\n')
 fout.close()
 
-fout=open('cnt_cld_SH_0-30.txt','w')
+fout=open('cnt_cld_lnd_SH_0-30.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_S1[il,:])+'\n')
+  fout.write(str(cnt_samp_S1[0,il,:])+'\n')
 fout.close()
 
-fout=open('cnt_cld_SH_30-60.txt','w')
+fout=open('cnt_cld_lnd_SH_30-60.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_S2[il,:])+'\n')
+  fout.write(str(cnt_samp_S2[0,il,:])+'\n')
 fout.close()
 
-fout=open('cnt_cld_SH_60-90.txt','w')
+fout=open('cnt_cld_lnd_SH_60-90.txt','w')
 for il in range(num_tcbin):
-  fout.write(str(cnt_samp_S3[il,:])+'\n')
+  fout.write(str(cnt_samp_S3[0,il,:])+'\n')
+fout.close()
+
+#--------
+fout=open('cnt_cld_ocn_NH_0-30.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_N1[1,il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_ocn_NH_30-60.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_N2[1,il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_ocn_NH_60-90.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_N3[1,il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_ocn_SH_0-30.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_S1[1,il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_ocn_SH_30-60.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_S2[1,il,:])+'\n')
+fout.close()
+
+fout=open('cnt_cld_ocn_SH_60-90.txt','w')
+for il in range(num_tcbin):
+  fout.write(str(cnt_samp_S3[1,il,:])+'\n')
 fout.close()
 
 #------------------------
