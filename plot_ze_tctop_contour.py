@@ -43,12 +43,13 @@ pdf_samp_S3=np.zeros((num_tcbin,num_zebin),dtype=np.float32) # PDF of cnt_sampl 
 #------------------------
 #-- open and read file --
 #------------------------
-fileN1=open('cnt_cld_lnd_NH_0-30.txt','r')
-fileN2=open('cnt_cld_lnd_NH_30-60.txt','r')
-fileN3=open('cnt_cld_lnd_NH_60-90.txt','r')
-fileS1=open('cnt_cld_lnd_SH_0-30.txt','r')
-fileS2=open('cnt_cld_lnd_SH_30-60.txt','r')
-fileS3=open('cnt_cld_lnd_SH_60-90.txt','r')
+file_path="./results_ocn_lnd_zemaxtop_cbaseNoPrec/"
+fileN1=open(file_path+'cnt_cld_ocn_NH_0-30.txt','r')
+fileN2=open(file_path+'cnt_cld_ocn_NH_30-60.txt','r')
+fileN3=open(file_path+'cnt_cld_ocn_NH_60-90.txt','r')
+fileS1=open(file_path+'cnt_cld_ocn_SH_0-30.txt','r')
+fileS2=open(file_path+'cnt_cld_ocn_SH_30-60.txt','r')
+fileS3=open(file_path+'cnt_cld_ocn_SH_60-90.txt','r')
 
 data=fileN1.read()
 data_n=data.replace('[',' ')
