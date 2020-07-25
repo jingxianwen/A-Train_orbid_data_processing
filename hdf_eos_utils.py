@@ -62,6 +62,29 @@ def read_vd_hdf(file_in,var_in,dimsz):
     return var_data #,var_dimn
 
 #=====================================================
+def read_vd_hdf2(file_in,var_in):
+    '''Read data stored as a VD variable in input HDF-EOS file.'''
+    '''Inputs are the file path and the required variable name.'''
+    '''Outputs are the data (numpy array).                     '''
+
+    #--information from input file--
+    hdf  = HDF(file_in)      # the HDF file
+    vs   = hdf.vstart()      # initialize VS interface on HDF file
+    ### vdinfo = vs.vdatainfo() # return info about all vdatas
+    vd   = vs.attach(var_in) # open a vdata given its name
+    dimsz = vd.inquire()[0]  # return 5 elements: 
+                             #   1. # of records
+                             #   2. interlace mode
+                             #   3. list of vdata field names
+                             #   4. size in bytes of the vdata record
+                             #   5. name of the vdata
+    var_data = np.array(vd.read(dimsz)) #read a number of records
+    vd.detach()              # close the vdata
+    vs.end()                 # terminate the vdata interface
+    hdf.close()              # close the HDF file
+    return var_data,dimsz
+
+#=====================================================
 def read_hdf_VD(file_in,var_in):
     '''Read Vdata sets (table, 1D) in the input HDF-EOS file.    '''
     '''Currently coded for surface variables of A-Train granule. '''
